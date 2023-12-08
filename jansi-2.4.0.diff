@@ -1,0 +1,30 @@
+diff --git a/src/main/native/jansi.c b/src/main/native/jansi.c
+index 2bd59f2..f8a21f1 100644
+--- a/src/main/native/jansi.c
++++ b/src/main/native/jansi.c
+@@ -428,7 +428,7 @@ JNIEXPORT void JNICALL Kernel32_NATIVE(init)(JNIEnv *env, jclass that)
+ 	(*env)->SetStaticIntField(env, that, (*env)->GetStaticFieldID(env, that, "STD_INPUT_HANDLE", "I"), (jint)STD_INPUT_HANDLE);
+ 	(*env)->SetStaticIntField(env, that, (*env)->GetStaticFieldID(env, that, "STD_OUTPUT_HANDLE", "I"), (jint)STD_OUTPUT_HANDLE);
+ 	(*env)->SetStaticIntField(env, that, (*env)->GetStaticFieldID(env, that, "STD_ERROR_HANDLE", "I"), (jint)STD_ERROR_HANDLE);
+-	(*env)->SetStaticIntField(env, that, (*env)->GetStaticFieldID(env, that, "INVALID_HANDLE_VALUE", "I"), (jint)INVALID_HANDLE_VALUE);
++	(*env)->SetStaticIntField(env, that, (*env)->GetStaticFieldID(env, that, "INVALID_HANDLE_VALUE", "I"), (jint)(__int64)INVALID_HANDLE_VALUE);
+ #endif
+    return;
+ }
+diff --git a/src/main/native/jansi.h b/src/main/native/jansi.h
+index 35528dd..d88ccc9 100644
+--- a/src/main/native/jansi.h
++++ b/src/main/native/jansi.h
+@@ -183,7 +183,11 @@
+   #define hawtjni_w_barrier() OSMemoryBarrier()
+ #elif defined(_WIN32) || defined(_WIN64)
+   #include <intrin.h>
+-  #define hawtjni_w_barrier() _mm_sfence(); _WriteBarrier()
++  #if defined(_M_ARM) || defined(_M_ARM64)
++    #define hawtjni_w_barrier() _WriteBarrier()
++  #else
++    #define hawtjni_w_barrier() _mm_sfence(); _WriteBarrier()
++  #endif
+ #else
+   #pragma message ( "Don't know how to do a memory barrier on this platform" )
+   #define hawtjni_w_barrier()
